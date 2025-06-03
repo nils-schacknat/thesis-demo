@@ -10,28 +10,49 @@
   <link rel="stylesheet" href="./static/css/index.css">
   <link rel="icon" href="./static/images/favicon.svg">
   <style>
+    /* ============================
+       GENERAL GRID / VIDEO STYLES
+       ============================ */
     .grid-container {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       grid-template-rows: repeat(4, auto);
       gap: 2px;
       width: 100%;
-      height: 100%;
+      /* height: 100%;   ← removed so grid only grows to content */
     }
     .grid-container img {
       width: 100%;
       height: auto;
       display: block;
     }
+
+    .video-pair-with-grid-wrapper {
+      display: flex;
+      gap: 20px;
+      align-items: stretch;
+      margin: 0 auto;
+    }
+
+    /* ================================================================================
+       FIRST SECTION (compact‐image‐column + top video). We keep flex slots even if hidden
+       ================================================================================ */
+    .compact-image-column {
+      flex: 0.5;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      visibility: visible; /* toggled via JS */
+    }
+    .compact-image-column.hidden {
+      visibility: hidden; /* hides content but keeps the flex width */
+    }
     .video-column {
       flex: 2;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
-    }
-    .video-container {
-      display: flex;
-      flex-direction: column;
     }
     .video-wrapper {
       flex: 1;
@@ -44,44 +65,22 @@
       height: auto;
       object-fit: contain;
     }
-    .media-wrapper {
-      display: flex;
-      gap: 40px;
-      align-items: stretch;
-    }
-    .video-pair-with-grid-wrapper {
-      display: flex;
-      gap: 20px;
-      align-items: stretch;
-      margin: 0 auto;
-    }
-    .compact-image-column {
-      flex: 0.5;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-    }
-    .compact-grid-container {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(4, auto);
-      gap: 2px;
-      width: 100%;
-    }
-    .compact-grid-container img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
     .video-box {
       flex: 1;
       display: flex;
       flex-direction: column;
     }
+
+    /* ================================================================================
+       SECOND SECTION (always‐on overlayed grid + validation/source video)
+       ================================================================================ */
+    .media-wrapper {
+      display: flex;
+      gap: 40px;
+      align-items: stretch;
+    }
     .image-column {
       flex: 1;
-      height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
@@ -92,6 +91,11 @@
       display: flex;
       flex-direction: column;
     }
+    /* video-column already defined above */
+
+    /* ======================
+       MISCELLANEOUS STYLES
+       ====================== */
     .caption {
       font-size: 1.25rem;
       font-weight: 500;
@@ -120,52 +124,57 @@
   </style>
   <script defer src="./static/js/fontawesome.all.min.js"></script>
   <script>
+    // For the bottom section’s “Validation/Source Sequence” video:
     function changeVideo() {
       const selector = document.getElementById('videoSelector');
-      const video = document.getElementById('mainVideo');
+      const video    = document.getElementById('mainVideo');
       const selectedValue = selector.value;
-      
-      // Update video source
       video.src = selectedValue;
-      video.load(); // Reload the video with new source
+      video.load();
       video.play();
     }
   </script>
   <script>
-    const methods = ["bensaid-8", "dante-1", "dante-8", "v-strong", "wvn-v2"];
+    // ===================
+    //  DATA & STATE
+    // ===================
+    const methods   = ["dante-8", "dante-1", "bensaid-8", "v-strong", "wvn-v2"];
     const sequences = ["park-2", "trail-12", "village"];
-
     let currentSequence = sequences[0];
-    let currentMethod = methods[0];
+    let currentMethod   = methods[0];
 
     function buildVideoPath(method, sequence) {
       return `./static/videos/${method}/${method}_${sequence}.mp4`;
     }
 
-    // When method changes: preserve timestamp, but always autoplay
+    // ===================
+    //  TOP VIDEO UPDATES
+    // ===================
     function updateVideoMethod() {
-      const video = document.getElementById('topVideo');
-      const newSrc = buildVideoPath(currentMethod, currentSequence);
-      const prevTime = video.currentTime;
+      const video      = document.getElementById('topVideo');
+      const newSrc     = buildVideoPath(currentMethod, currentSequence);
+      const prevTime   = video.currentTime;
+      const wasPlaying = !video.paused; // remember if it was playing
 
       video.src = newSrc;
       video.load();
       video.playbackRate = 0.5;
 
       const onLoaded = () => {
-        // If previous time is within new video duration, seek there
         if (video.duration > prevTime) {
           video.currentTime = prevTime;
         }
-        video.play();
+        if (wasPlaying) {
+          video.play();
+        }
+        // if it was paused before, leave it paused
         video.removeEventListener('loadedmetadata', onLoaded);
       };
       video.addEventListener('loadedmetadata', onLoaded);
     }
 
-    // When sequence changes: reset to 0 and autoplay
     function updateVideoSequence() {
-      const video = document.getElementById('topVideo');
+      const video  = document.getElementById('topVideo');
       const newSrc = buildVideoPath(currentMethod, currentSequence);
 
       video.src = newSrc;
@@ -185,11 +194,44 @@
       updateVideoSequence();
     }
 
+    // ===================
+    //  IMAGE COLUMN LOGIC
+    // ===================
+    function updateImageColumn() {
+      const imgCol = document.querySelector('.compact-image-column');
+      const grid   = document.getElementById('gridContainer2');
+      grid.innerHTML = ""; // clear prior content
+
+      if (currentMethod === 'dante-8') {
+        imgCol.classList.remove('hidden');
+        for (let i = 0; i < 8; i++) {
+          const img = document.createElement('img');
+          img.src = `./static/images/dante-8/image_${i}.jpg`;
+          img.alt = `img${i + 1}`;
+          grid.appendChild(img);
+        }
+      }
+      else if (currentMethod === 'dante-1') {
+        imgCol.classList.remove('hidden');
+        const img = document.createElement('img');
+        img.src = `./static/images/dante-1/image_0.jpg`;
+        img.alt = 'img1';
+        grid.appendChild(img);
+      }
+      else {
+        imgCol.classList.add('hidden');
+      }
+    }
+
     function onMethodChange() {
       currentMethod = document.getElementById('methodSelector').value;
       updateVideoMethod();
+      updateImageColumn();
     }
 
+    // ===================
+    //  INITIALIZATION
+    // ===================
     document.addEventListener('DOMContentLoaded', () => {
       // Populate sequence dropdown
       const seqSelect = document.getElementById('sequenceSelector');
@@ -213,119 +255,119 @@
       methodSelect.value = currentMethod;
       methodSelect.addEventListener('change', onMethodChange);
 
-      // Initialize video: autoplay from start
+      // Initialize both top video + image column
       updateVideoSequence();
+      updateImageColumn();
     });
   </script>
 </head>
 <body>
-<nav class="navbar" role="navigation" aria-label="main navigation">
-  <div class="navbar-brand">
-    <a class="navbar-item" href="#">
-      <span class="icon">
-        <i class="fas fa-home"></i>
-      </span>
-    </a>
-  </div>
-</nav>
-
-<section class="hero">
-  <div class="hero-body">
-    <div class="container is-max-desktop has-text-centered">
-      <h1 class="title is-1 publication-title">DANTE: Depth ANything based Traversability Estimation</h1>
-      <h2 class="subtitle is-4">Video Demonstration</h2>
+  <nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="#">
+        <span class="icon">
+          <i class="fas fa-home"></i>
+        </span>
+      </a>
     </div>
-  </div>
-</section>
+  </nav>
 
-<!-- Sequence selector above the first section -->
-<div class="selector-container">
-  <label for="sequenceSelector">Select Sequence:</label>
-  <select id="sequenceSelector">
-    <!-- Populated dynamically -->
-  </select>
-</div>
-
-<!-- Single video layout with image grid, constrained like second section -->
-<section class="section">
-  <div class="container is-max-desktop">
-    <div class="video-pair-with-grid-wrapper">
-      <div class="compact-image-column">
-        <div class="caption">Training Images</div>
-        <div class="compact-grid-container">
-          <img src="./static/images/overlayed/0.jpg" alt="img1">
-          <img src="./static/images/overlayed/1.jpg" alt="img2">
-          <img src="./static/images/overlayed/2.jpg" alt="img3">
-          <img src="./static/images/overlayed/3.jpg" alt="img4">
-          <img src="./static/images/overlayed/4.jpg" alt="img5">
-          <img src="./static/images/overlayed/5.jpg" alt="img6">
-          <img src="./static/images/overlayed/6.jpg" alt="img7">
-          <img src="./static/images/overlayed/7.jpg" alt="img8">
-        </div>
-      </div>
-      <div class="video-box video-column">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
-          <div class="caption" style="margin-bottom: 0;">Results</div>
-          <select id="methodSelector">
-            <!-- Populated dynamically -->
-          </select>
-        </div>
-        <div class="video-wrapper">
-          <video id="topVideo" controls muted playsinline>
-            <!-- Source set dynamically, playbackRate set to 0.5 -->
-          </video>
-        </div>
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop has-text-centered">
+        <h1 class="title is-1 publication-title">
+          DANTE: Depth ANything based Traversability Estimation
+        </h1>
+        <h2 class="subtitle is-4">Video Demonstration</h2>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section class="section">
-  <div class="container is-max-desktop">
-    <div class="media-wrapper">
-      <div class="image-column">
-        <div class="caption">Training Images</div>
-        <div class="grid-wrapper">
-          <div id="gridContainer" class="grid-container"></div>
-          <script>
-            for (let i = 0; i < 8; i++) {
-              document
-                .getElementById('gridContainer')
-                .appendChild(document.createElement('img'))
-                .setAttribute('src', `./static/images/overlayed/${i}.jpg`);
-              document
-                .getElementById('gridContainer')
-                .lastElementChild
-                .setAttribute('alt', `img${i + 1}`);
-            }
-          </script>
+  <!-- Sequence selector above the first section -->
+  <div class="selector-container">
+    <label for="sequenceSelector">Select Sequence:</label>
+    <select id="sequenceSelector">
+      <!-- Populated dynamically -->
+    </select>
+  </div>
+
+  <!-- First section: Video + (potential) image grid -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="video-pair-with-grid-wrapper">
+        <!-- Left: Image column (always occupies its flex share, but hidden if no images) -->
+        <div class="compact-image-column">
+          <div class="caption">Training Images</div>
+          <div id="gridContainer2" class="grid-container">
+            <!-- JS will inject up to 8 images, or 1 image, or leave blank -->
+          </div>
         </div>
-      </div>
-      <div class="video-column video-container">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
-          <div class="caption" style="margin-bottom: 0;">Results</div>
-          <select id="videoSelector" onchange="changeVideo()" style="padding: 0.5rem; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc;">
-            <option value="./static/videos/data_ipa_val.mp4">Validation Sequence</option>
-            <option value="./static/videos/data_ipa_train.mp4">Source Sequence</option>
-          </select>
-        </div>
-        <div class="video-wrapper">
-          <video id="mainVideo" controls muted loop playsinline>
-            <source src="./static/videos/data_ipa_val.mp4" type="video/mp4">
-          </video>
+
+        <!-- Right: Video + Method Selector -->
+        <div class="video-box video-column">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
+            <div class="caption" style="margin-bottom: 0;">Results</div>
+            <select id="methodSelector">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="video-wrapper">
+            <video id="topVideo" controls muted playsinline>
+              <!-- Source set dynamically by JS -->
+            </video>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<footer class="footer">
-  <div class="container has-text-centered">
-    <p>
-      Website template based on Nerfies.<br>
-      Modified for thesis presentation.
-    </p>
-  </div>
-</footer>
+  <!-- Second section: Always‐on overlayed grid + validation/source video -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="media-wrapper">
+        <!-- Left: Always‐on Training Images (overlayed) -->
+        <div class="image-column">
+          <div class="caption">Training Images</div>
+          <div class="grid-wrapper">
+            <div id="gridContainer" class="grid-container"></div>
+            <script>
+              // Hard‐coded eight overlayed images
+              for (let i = 0; i < 8; i++) {
+                const img = document.createElement('img');
+                img.src = `./static/images/overlayed/${i}.jpg`;
+                img.alt = `img${i + 1}`;
+                document.getElementById('gridContainer').appendChild(img);
+              }
+            </script>
+          </div>
+        </div>
+
+        <!-- Right: Validation / Source Sequence video -->
+        <div class="video-column video-container">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
+            <div class="caption" style="margin-bottom: 0;">Results</div>
+            <select id="videoSelector" onchange="changeVideo()" style="padding: 0.5rem; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc;">
+              <option value="./static/videos/data_ipa_val.mp4">Validation Sequence</option>
+              <option value="./static/videos/data_ipa_train.mp4">Source Sequence</option>
+            </select>
+          </div>
+          <div class="video-wrapper">
+            <video id="mainVideo" controls muted loop playsinline>
+              <source src="./static/videos/data_ipa_val.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container has-text-centered">
+      <p>
+        Website template based on Nerfies.<br>
+        Modified for thesis presentation.
+      </p>
+    </div>
+  </footer>
 </body>
 </html>
