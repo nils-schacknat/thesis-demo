@@ -117,6 +117,85 @@
   </style>
   <script defer src="./static/js/fontawesome.all.min.js"></script>
   <script>
+    let video1, video2;
+    let isSyncing = false;
+
+    function syncVideos() {
+      video1 = document.getElementById('topVideo');
+      video2 = document.getElementById('topVideoSecond');
+      
+      if (!video1 || !video2) return;
+
+      // Remove any existing listeners to prevent duplicates
+      video1.removeEventListener('play', onVideo1Play);
+      video1.removeEventListener('pause', onVideo1Pause);
+      video1.removeEventListener('seeking', onVideo1Seeking);
+      video2.removeEventListener('play', onVideo2Play);
+      video2.removeEventListener('pause', onVideo2Pause);
+      video2.removeEventListener('seeking', onVideo2Seeking);
+
+      // Add event listeners
+      video1.addEventListener('play', onVideo1Play);
+      video1.addEventListener('pause', onVideo1Pause);
+      video1.addEventListener('seeking', onVideo1Seeking);
+      video2.addEventListener('play', onVideo2Play);
+      video2.addEventListener('pause', onVideo2Pause);
+      video2.addEventListener('seeking', onVideo2Seeking);
+    }
+
+    function onVideo1Play() {
+      if (isSyncing) return;
+      isSyncing = true;
+      video2.currentTime = video1.currentTime;
+      video2.play().finally(() => {
+        isSyncing = false;
+      });
+    }
+
+    function onVideo1Pause() {
+      if (isSyncing) return;
+      isSyncing = true;
+      video2.pause();
+      isSyncing = false;
+    }
+
+    function onVideo1Seeking() {
+      if (isSyncing) return;
+      isSyncing = true;
+      video2.currentTime = video1.currentTime;
+      setTimeout(() => {
+        isSyncing = false;
+      }, 100);
+    }
+
+    function onVideo2Play() {
+      if (isSyncing) return;
+      isSyncing = true;
+      video1.currentTime = video2.currentTime;
+      video1.play().finally(() => {
+        isSyncing = false;
+      });
+    }
+
+    function onVideo2Pause() {
+      if (isSyncing) return;
+      isSyncing = true;
+      video1.pause();
+      isSyncing = false;
+    }
+
+    function onVideo2Seeking() {
+      if (isSyncing) return;
+      isSyncing = true;
+      video1.currentTime = video2.currentTime;
+      setTimeout(() => {
+        isSyncing = false;
+      }, 100);
+    }
+
+    // Initialize sync when page loads
+    document.addEventListener('DOMContentLoaded', syncVideos);
+
     function changeVideo() {
       const selector = document.getElementById('videoSelector');
       const video = document.getElementById('mainVideo');
@@ -131,6 +210,7 @@
       const selectedValue = selector.value;
       video.src = selectedValue;
       video.load();
+      setTimeout(syncVideos, 200);
     }
 
     function changeVideoTopSecond() {
@@ -139,6 +219,7 @@
       const selectedValue = selector.value;
       video.src = selectedValue;
       video.load();
+      setTimeout(syncVideos, 200);
     }
   </script>
 </head>
@@ -188,7 +269,7 @@
           </select>
         </div>
         <div class="video-wrapper">
-          <video id="topVideo" controls autoplay muted loop playsinline>
+          <video id="topVideo" controls muted loop playsinline>
             <source src="./static/videos/data_ipa_val.mp4" type="video/mp4">
           </video>
         </div>
@@ -202,7 +283,7 @@
           </select>
         </div>
         <div class="video-wrapper">
-          <video id="topVideoSecond" controls autoplay muted loop playsinline>
+          <video id="topVideoSecond" controls muted loop playsinline>
             <source src="./static/videos/data_ipa_val.mp4" type="video/mp4">
           </video>
         </div>
