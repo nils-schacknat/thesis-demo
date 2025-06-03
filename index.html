@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DANTE: Depth ANything based Traversability Estimation</title>
+  <title>Thesis Demo</title>
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
   <link rel="stylesheet" href="./static/css/bulma.min.css">
   <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
   <link rel="stylesheet" href="./static/css/index.css">
-  <link rel="icon" href="./static/images/favicon.svg">
+  <link rel="icon" href="./static/images/Dante-alighieri.jpeg">
   <style>
     /* ============================
        GENERAL GRID / VIDEO STYLES
@@ -238,6 +238,7 @@
     //  DATA & STATE
     // ===================
     const methods   = ["dante-8", "dante-1", "bensaid-8", "v-strong", "wvn-v2"];
+    const method_names = ["DANTE (8)", "DANTE (1)", "Bensaid et al. (8)", "V-STRONG", "WVN-v2"]
     const sequences = ["park-2", "trail-12", "village"];
     let currentSequence = sequences[0];
     let currentMethod   = methods[0];
@@ -347,10 +348,10 @@
 
       // Populate method dropdown
       const methodSelect = document.getElementById('methodSelector');
-      methods.forEach(method => {
+      methods.forEach((method, idx) => {
         const opt = document.createElement('option');
         opt.value = method;
-        opt.textContent = method;
+        opt.textContent = method_names[idx];
         methodSelect.appendChild(opt);
       });
       methodSelect.value = currentMethod;
@@ -370,30 +371,27 @@
   </div>
 
   <nav class="navbar" role="navigation" aria-label="main navigation">
-    <div class="navbar-brand">
-      <a class="navbar-item" href="#">
-        <span class="icon">
-          <i class="fas fa-home"></i>
-        </span>
-      </a>
-    </div>
   </nav>
 
   <section class="hero">
     <div class="hero-body">
       <div class="container is-max-desktop has-text-centered">
         <h1 class="title is-1 publication-title">
-          DANTE: Depth ANything based Traversability Estimation
+          Leveraging Depth-Aware Representations for Few-Shot Traversability Estimation
         </h1>
-        <h2 class="subtitle is-4">Video Demonstration</h2>
+        <h2 class="subtitle is-4 mt-4">
+          Nils Schacknat
+        </h2>
       </div>
     </div>
   </section>
+  
 
   <!-- Sequence selector above the first section -->
   <div class="selector-container">
     <label for="sequenceSelector">Select Sequence:</label>
-    <select id="sequenceSelector">
+    <select id="sequenceSelector"
+            style="padding: 0.5rem; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc;">
       <!-- Populated dynamically -->
     </select>
   </div>
@@ -414,7 +412,8 @@
         <div class="video-box video-column">
           <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
             <div class="caption" style="margin-bottom: 0;">Results</div>
-            <select id="methodSelector">
+            <select id="methodSelector"
+                    style="padding: 0.5rem; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc;">
               <!-- Populated dynamically -->
             </select>
           </div>
@@ -422,6 +421,24 @@
             <video id="topVideo" controls muted playsinline>
               <!-- Source set dynamically by JS -->
             </video>
+            <script>
+              const topVid = document.getElementById('topVideo');
+            
+              // As soon as the video metadata is ready, hide the controls:
+              topVid.addEventListener('loadedmetadata', () => {
+                topVid.removeAttribute('controls');
+              });
+            
+              // On hover, re-add controls so the bar appears:
+              topVid.addEventListener('mouseenter', () => {
+                topVid.setAttribute('controls', '');
+              });
+            
+              // When mouse leaves, hide them again:
+              topVid.addEventListener('mouseleave', () => {
+                topVid.removeAttribute('controls');
+              });
+            </script>
           </div>
         </div>
       </div>
@@ -470,11 +487,32 @@
   </section>
 
   <footer class="footer">
-    <div class="container has-text-centered">
-      <p>
-        Website template based on Nerfies.<br>
-        Modified for thesis presentation.
-      </p>
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column is-8">
+          <div class="content">
+            <p>
+              This website is based on <strong>Nerfies</strong> and licensed under a 
+              <a
+                rel="license"
+                href="https://creativecommons.org/licenses/by-sa/4.0/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Creative Commons Attribution-ShareAlike 4.0 International License
+              </a>.
+              This means you are free to borrow the source code — please link back to 
+              <a
+                href="https://github.com/nerfies/nerfies.github.io"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                the original project
+              </a>.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   </footer>
 </body>
