@@ -266,6 +266,10 @@
         }
         if (wasPlaying) {
           video.play();
+          // Hide controls after starting playback
+          setTimeout(() => {
+            video.controls = false;
+          }, 100);
         }
         // if it was paused before, leave it paused
         video.removeEventListener('loadedmetadata', onLoaded);
@@ -284,6 +288,10 @@
       const onLoaded = () => {
         video.currentTime = 0;
         video.play();
+        // Hide controls after starting playback
+        setTimeout(() => {
+          video.controls = false;
+        }, 100);
         video.removeEventListener('loadedmetadata', onLoaded);
       };
       video.addEventListener('loadedmetadata', onLoaded);
@@ -360,6 +368,54 @@
       // Initialize both top video + image column
       updateVideoSequence();
       updateImageColumn();
+
+      // Add hover/click functionality to show controls for the top video
+      const topVideo = document.getElementById('topVideo');
+      let hideControlsTimeout;
+      
+      // Show controls on mouse movement within video
+      topVideo.addEventListener('mousemove', () => {
+        topVideo.controls = true;
+        
+        // Clear any existing timeout
+        if (hideControlsTimeout) {
+          clearTimeout(hideControlsTimeout);
+        }
+        
+        // Set new timeout to hide controls
+        hideControlsTimeout = setTimeout(() => {
+          if (!topVideo.paused) {
+            topVideo.controls = false;
+          }
+        }, 2000);
+      });
+      
+      // Hide controls when mouse leaves video area
+      topVideo.addEventListener('mouseleave', () => {
+        if (hideControlsTimeout) {
+          clearTimeout(hideControlsTimeout);
+        }
+        if (!topVideo.paused) {
+          topVideo.controls = false;
+        }
+      });
+      
+      // Show controls on click
+      topVideo.addEventListener('click', () => {
+        topVideo.controls = true;
+        
+        // Clear any existing timeout
+        if (hideControlsTimeout) {
+          clearTimeout(hideControlsTimeout);
+        }
+        
+        // Set new timeout to hide controls
+        hideControlsTimeout = setTimeout(() => {
+          if (!topVideo.paused) {
+            topVideo.controls = false;
+          }
+        }, 2000);
+      });
     });
   </script>
 </head>
@@ -421,24 +477,6 @@
             <video id="topVideo" controls muted playsinline>
               <!-- Source set dynamically by JS -->
             </video>
-            <script>
-              const topVid = document.getElementById('topVideo');
-            
-              // As soon as the video metadata is ready, hide the controls:
-              topVid.addEventListener('loadedmetadata', () => {
-                topVid.removeAttribute('controls');
-              });
-            
-              // On hover, re-add controls so the bar appears:
-              topVid.addEventListener('mouseenter', () => {
-                topVid.setAttribute('controls', '');
-              });
-            
-              // When mouse leaves, hide them again:
-              topVid.addEventListener('mouseleave', () => {
-                topVid.removeAttribute('controls');
-              });
-            </script>
           </div>
         </div>
       </div>
