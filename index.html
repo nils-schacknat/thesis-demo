@@ -49,23 +49,11 @@
       gap: 40px;
       align-items: stretch;
     }
-    .video-pair-wrapper {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      gap: 20px;
-    }
     .video-pair-with-grid-wrapper {
-      max-width: 1600px;
-      margin: 0 auto;
       display: flex;
       gap: 20px;
       align-items: stretch;
-    }
-    .dual-video-section {
-      flex: 2;
-      display: flex;
-      gap: 20px;
+      margin: 0 auto;
     }
     .compact-image-column {
       flex: 0.5;
@@ -73,9 +61,6 @@
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
-    }
-    .compact-grid-wrapper {
-      width: 100%;
     }
     .compact-grid-container {
       display: grid;
@@ -114,113 +99,123 @@
       margin-bottom: 1rem;
       flex-shrink: 0;
     }
+    .selector-container {
+      max-width: 1600px;
+      margin: 1rem auto;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 1rem;
+    }
+    .selector-container label {
+      font-size: 1.25rem;
+      font-weight: 500;
+    }
+    .selector-container select {
+      padding: 0.5rem;
+      font-size: 1rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
   </style>
   <script defer src="./static/js/fontawesome.all.min.js"></script>
   <script>
-    let video1, video2;
-    let isSyncing = false;
-
-    function syncVideos() {
-      video1 = document.getElementById('topVideo');
-      video2 = document.getElementById('topVideoSecond');
-      
-      if (!video1 || !video2) return;
-
-      // Remove any existing listeners to prevent duplicates
-      video1.removeEventListener('play', onVideo1Play);
-      video1.removeEventListener('pause', onVideo1Pause);
-      video1.removeEventListener('seeking', onVideo1Seeking);
-      video2.removeEventListener('play', onVideo2Play);
-      video2.removeEventListener('pause', onVideo2Pause);
-      video2.removeEventListener('seeking', onVideo2Seeking);
-
-      // Add event listeners
-      video1.addEventListener('play', onVideo1Play);
-      video1.addEventListener('pause', onVideo1Pause);
-      video1.addEventListener('seeking', onVideo1Seeking);
-      video2.addEventListener('play', onVideo2Play);
-      video2.addEventListener('pause', onVideo2Pause);
-      video2.addEventListener('seeking', onVideo2Seeking);
-    }
-
-    function onVideo1Play() {
-      if (isSyncing) return;
-      isSyncing = true;
-      video2.currentTime = video1.currentTime;
-      video2.play().finally(() => {
-        isSyncing = false;
-      });
-    }
-
-    function onVideo1Pause() {
-      if (isSyncing) return;
-      isSyncing = true;
-      video2.pause();
-      isSyncing = false;
-    }
-
-    function onVideo1Seeking() {
-      if (isSyncing) return;
-      isSyncing = true;
-      video2.currentTime = video1.currentTime;
-      setTimeout(() => {
-        isSyncing = false;
-      }, 100);
-    }
-
-    function onVideo2Play() {
-      if (isSyncing) return;
-      isSyncing = true;
-      video1.currentTime = video2.currentTime;
-      video1.play().finally(() => {
-        isSyncing = false;
-      });
-    }
-
-    function onVideo2Pause() {
-      if (isSyncing) return;
-      isSyncing = true;
-      video1.pause();
-      isSyncing = false;
-    }
-
-    function onVideo2Seeking() {
-      if (isSyncing) return;
-      isSyncing = true;
-      video1.currentTime = video2.currentTime;
-      setTimeout(() => {
-        isSyncing = false;
-      }, 100);
-    }
-
-    // Initialize sync when page loads
-    document.addEventListener('DOMContentLoaded', syncVideos);
-
     function changeVideo() {
       const selector = document.getElementById('videoSelector');
       const video = document.getElementById('mainVideo');
       const selectedValue = selector.value;
+      
+      // Update video source
       video.src = selectedValue;
-      video.load();
+      video.load(); // Reload the video with new source
+      video.play();
+    }
+  </script>
+  <script>
+    const methods = ["bensaid-8", "dante-1", "dante-8", "v-strong", "wvn-v2"];
+    const sequences = ["park-2", "trail-12", "village"];
+
+    let currentSequence = sequences[0];
+    let currentMethod = methods[0];
+
+    function buildVideoPath(method, sequence) {
+      return `./static/videos/${method}/${method}_${sequence}.mp4`;
     }
 
-    function changeVideoTop() {
-      const selector = document.getElementById('videoSelectorTop');
+    // When method changes: preserve timestamp, but always autoplay
+    function updateVideoMethod() {
       const video = document.getElementById('topVideo');
-      const selectedValue = selector.value;
-      video.src = selectedValue;
+      const newSrc = buildVideoPath(currentMethod, currentSequence);
+      const prevTime = video.currentTime;
+
+      video.src = newSrc;
       video.load();
-      setTimeout(syncVideos, 200);
+      video.playbackRate = 0.5;
+
+      const onLoaded = () => {
+        // If previous time is within new video duration, seek there
+        if (video.duration > prevTime) {
+          video.currentTime = prevTime;
+        }
+        video.play();
+        video.removeEventListener('loadedmetadata', onLoaded);
+      };
+      video.addEventListener('loadedmetadata', onLoaded);
     }
 
-    function changeVideoTopSecond() {
-      const selector = document.getElementById('videoSelectorTopSecond');
-      const video = document.getElementById('topVideoSecond');
-      const selectedValue = selector.value;
-      video.src = selectedValue;
+    // When sequence changes: reset to 0 and autoplay
+    function updateVideoSequence() {
+      const video = document.getElementById('topVideo');
+      const newSrc = buildVideoPath(currentMethod, currentSequence);
+
+      video.src = newSrc;
       video.load();
-      setTimeout(syncVideos, 200);
+      video.playbackRate = 0.5;
+
+      const onLoaded = () => {
+        video.currentTime = 0;
+        video.play();
+        video.removeEventListener('loadedmetadata', onLoaded);
+      };
+      video.addEventListener('loadedmetadata', onLoaded);
     }
+
+    function onSequenceChange() {
+      currentSequence = document.getElementById('sequenceSelector').value;
+      updateVideoSequence();
+    }
+
+    function onMethodChange() {
+      currentMethod = document.getElementById('methodSelector').value;
+      updateVideoMethod();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Populate sequence dropdown
+      const seqSelect = document.getElementById('sequenceSelector');
+      sequences.forEach(seq => {
+        const opt = document.createElement('option');
+        opt.value = seq;
+        opt.textContent = seq;
+        seqSelect.appendChild(opt);
+      });
+      seqSelect.value = currentSequence;
+      seqSelect.addEventListener('change', onSequenceChange);
+
+      // Populate method dropdown
+      const methodSelect = document.getElementById('methodSelector');
+      methods.forEach(method => {
+        const opt = document.createElement('option');
+        opt.value = method;
+        opt.textContent = method;
+        methodSelect.appendChild(opt);
+      });
+      methodSelect.value = currentMethod;
+      methodSelect.addEventListener('change', onMethodChange);
+
+      // Initialize video: autoplay from start
+      updateVideoSequence();
+    });
   </script>
 </head>
 <body>
@@ -243,48 +238,41 @@
   </div>
 </section>
 
-<!-- Dual video layout with image grid -->
+<!-- Sequence selector above the first section -->
+<div class="selector-container">
+  <label for="sequenceSelector">Select Sequence:</label>
+  <select id="sequenceSelector">
+    <!-- Populated dynamically -->
+  </select>
+</div>
+
+<!-- Single video layout with image grid, constrained like second section -->
 <section class="section">
-  <div class="video-pair-with-grid-wrapper">
-    <div class="compact-image-column">
-      <div class="caption">Training Images</div>
-      <div class="compact-grid-container">
-        <img src="./static/images/overlayed/0.jpg" alt="img1">
-        <img src="./static/images/overlayed/1.jpg" alt="img2">
-        <img src="./static/images/overlayed/2.jpg" alt="img3">
-        <img src="./static/images/overlayed/3.jpg" alt="img4">
-        <img src="./static/images/overlayed/4.jpg" alt="img5">
-        <img src="./static/images/overlayed/5.jpg" alt="img6">
-        <img src="./static/images/overlayed/6.jpg" alt="img7">
-        <img src="./static/images/overlayed/7.jpg" alt="img8">
+  <div class="container is-max-desktop">
+    <div class="video-pair-with-grid-wrapper">
+      <div class="compact-image-column">
+        <div class="caption">Training Images</div>
+        <div class="compact-grid-container">
+          <img src="./static/images/overlayed/0.jpg" alt="img1">
+          <img src="./static/images/overlayed/1.jpg" alt="img2">
+          <img src="./static/images/overlayed/2.jpg" alt="img3">
+          <img src="./static/images/overlayed/3.jpg" alt="img4">
+          <img src="./static/images/overlayed/4.jpg" alt="img5">
+          <img src="./static/images/overlayed/5.jpg" alt="img6">
+          <img src="./static/images/overlayed/6.jpg" alt="img7">
+          <img src="./static/images/overlayed/7.jpg" alt="img8">
+        </div>
       </div>
-    </div>
-    <div class="dual-video-section">
-      <div class="video-box">
+      <div class="video-box video-column">
         <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
-          <div class="caption" style="margin-bottom: 0;">Results A</div>
-          <select id="videoSelectorTop" onchange="changeVideoTop()" style="padding: 0.5rem; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc;">
-            <option value="./static/videos/data_ipa_val.mp4">Validation Sequence</option>
-            <option value="./static/videos/data_ipa_train.mp4">Source Sequence</option>
+          <div class="caption" style="margin-bottom: 0;">Results</div>
+          <select id="methodSelector">
+            <!-- Populated dynamically -->
           </select>
         </div>
         <div class="video-wrapper">
-          <video id="topVideo" controls muted loop playsinline>
-            <source src="./static/videos/data_ipa_val.mp4" type="video/mp4">
-          </video>
-        </div>
-      </div>
-      <div class="video-box">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
-          <div class="caption" style="margin-bottom: 0;">Results B</div>
-          <select id="videoSelectorTopSecond" onchange="changeVideoTopSecond()" style="padding: 0.5rem; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc;">
-            <option value="./static/videos/data_ipa_val.mp4">Validation Sequence</option>
-            <option value="./static/videos/data_ipa_train.mp4">Source Sequence</option>
-          </select>
-        </div>
-        <div class="video-wrapper">
-          <video id="topVideoSecond" controls muted loop playsinline>
-            <source src="./static/videos/data_ipa_val.mp4" type="video/mp4">
+          <video id="topVideo" controls muted playsinline>
+            <!-- Source set dynamically, playbackRate set to 0.5 -->
           </video>
         </div>
       </div>
@@ -298,16 +286,19 @@
       <div class="image-column">
         <div class="caption">Training Images</div>
         <div class="grid-wrapper">
-          <div class="grid-container">
-            <img src="./static/images/overlayed/0.jpg" alt="img1">
-            <img src="./static/images/overlayed/1.jpg" alt="img2">
-            <img src="./static/images/overlayed/2.jpg" alt="img3">
-            <img src="./static/images/overlayed/3.jpg" alt="img4">
-            <img src="./static/images/overlayed/4.jpg" alt="img5">
-            <img src="./static/images/overlayed/5.jpg" alt="img6">
-            <img src="./static/images/overlayed/6.jpg" alt="img7">
-            <img src="./static/images/overlayed/7.jpg" alt="img8">
-          </div>
+          <div id="gridContainer" class="grid-container"></div>
+          <script>
+            for (let i = 0; i < 8; i++) {
+              document
+                .getElementById('gridContainer')
+                .appendChild(document.createElement('img'))
+                .setAttribute('src', `./static/images/overlayed/${i}.jpg`);
+              document
+                .getElementById('gridContainer')
+                .lastElementChild
+                .setAttribute('alt', `img${i + 1}`);
+            }
+          </script>
         </div>
       </div>
       <div class="video-column video-container">
