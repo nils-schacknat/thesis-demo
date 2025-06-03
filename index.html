@@ -442,6 +442,20 @@
     </div>
   </section>
   
+  <section class="section">
+    <div class="container">
+      <div class="content">
+        <p>This website aims to support the qualitative evaluation of my thesis, which addresses the task of vision-based traversability estimation.</p>
+        <p>
+          My thesis identifies <em>Depth Anything v2</em> as an ideal task-aligned foundational model and proposes to leverage its depth-aware and semantically rich patch embeddings for few-shot segmentation. Further, it demonstrates that, with the <em>Depth Anything v2</em> encoder as a backbone, a simple linear layer trained on only a few manual annotations can reliably predict traversability. A complementary instance selection strategy ensures that the training set remains both diverse and representative.
+        </p>
+  
+        <p>
+          This method &mdash; termed <strong>DANTE</strong> (<em><strong>D</strong>epth <strong>AN</strong>ything based <strong>T</strong>raversability <strong>E</strong>stimation</em>) &mdash; requires minimal supervision and confidently outperforms recent pose-projection-based methods while running at real-time speeds.
+        </p>
+      </div>
+    </div>
+  </section>
 
   <!-- Sequence selector above the first section -->
   <div class="selector-container">
@@ -467,7 +481,7 @@
         <!-- Right: Video + Method Selector -->
         <div class="video-box video-column">
           <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
-            <div class="caption" style="margin-bottom: 0;">Results</div>
+            <div class="caption" style="margin-bottom: 0;">Method:</div>
             <select id="methodSelector"
                     style="padding: 0.5rem; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc;">
               <!-- Populated dynamically -->
@@ -508,7 +522,7 @@
         <!-- Right: Validation / Source Sequence video -->
         <div class="video-column video-container">
           <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
-            <div class="caption" style="margin-bottom: 0;">Results</div>
+            <div class="caption" style="margin-bottom: 0;">Results:</div>
             <select id="videoSelector" onchange="changeVideo()" style="padding: 0.5rem; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc;">
               <option value="./static/videos/data_ipa_val.mp4">Validation Sequence</option>
               <option value="./static/videos/data_ipa_train.mp4">Source Sequence</option>
