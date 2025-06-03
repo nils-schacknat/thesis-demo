@@ -25,6 +25,11 @@
       width: 100%;
       height: auto;
       display: block;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+    .grid-container img:hover {
+      opacity: 0.8;
     }
 
     .video-pair-with-grid-wrapper {
@@ -94,6 +99,51 @@
     /* video-column already defined above */
 
     /* ======================
+       MODAL STYLES
+       ====================== */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      animation: fadeIn 0.3s ease;
+    }
+    .modal.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 35px;
+      color: #fff;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    .modal-close:hover,
+    .modal-close:focus {
+      color: #ccc;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* ======================
        MISCELLANEOUS STYLES
        ====================== */
     .caption {
@@ -124,7 +174,56 @@
   </style>
   <script defer src="./static/js/fontawesome.all.min.js"></script>
   <script>
-    // For the bottom section’s “Validation/Source Sequence” video:
+    // ===================
+    //  MODAL FUNCTIONALITY
+    // ===================
+    function openModal(imageSrc) {
+      const modal = document.getElementById('imageModal');
+      const modalImg = document.getElementById('modalImage');
+      
+      modalImg.src = imageSrc;
+      modalImg.style.height = '600px';
+      modalImg.style.width  = 'auto';
+      modal.classList.add('show');
+      
+      // Prevent body scrolling when modal is open
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('imageModal');
+      modal.classList.remove('show');
+      
+      // Restore body scrolling
+      document.body.style.overflow = 'auto';
+      modalImg.style.height = '';
+      modalImg.style.width  = '';
+    }
+
+    function makeImageClickable(img) {
+      img.addEventListener('click', function() {
+        openModal(this.src);
+      });
+    }
+
+    // Close modal when clicking outside the image
+    document.addEventListener('DOMContentLoaded', function() {
+      const modal = document.getElementById('imageModal');
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+          closeModal();
+        }
+      });
+      
+      // Close modal on escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          closeModal();
+        }
+      });
+    });
+
+    // For the bottom section's "Validation/Source Sequence" video:
     function changeVideo() {
       const selector = document.getElementById('videoSelector');
       const video    = document.getElementById('mainVideo');
@@ -208,6 +307,7 @@
           const img = document.createElement('img');
           img.src = `./static/images/dante-8/image_${i}.jpg`;
           img.alt = `img${i + 1}`;
+          makeImageClickable(img); // Add click functionality
           grid.appendChild(img);
         }
       }
@@ -216,6 +316,7 @@
         const img = document.createElement('img');
         img.src = `./static/images/dante-1/image_0.jpg`;
         img.alt = 'img1';
+        makeImageClickable(img); // Add click functionality
         grid.appendChild(img);
       }
       else {
@@ -262,6 +363,12 @@
   </script>
 </head>
 <body>
+  <!-- Modal for enlarged images -->
+  <div id="imageModal" class="modal">
+    <button class="modal-close is-large" aria-label="close" onclick="closeModal()"></button>
+    <img id="modalImage" class="modal-content" alt="Enlarged view">
+  </div>
+
   <nav class="navbar" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
       <a class="navbar-item" href="#">
@@ -331,11 +438,12 @@
           <div class="grid-wrapper">
             <div id="gridContainer" class="grid-container"></div>
             <script>
-              // Hard‐coded eight overlayed images
+              // Hard‐coded eight overlayed images with click functionality
               for (let i = 0; i < 8; i++) {
                 const img = document.createElement('img');
                 img.src = `./static/images/overlayed/${i}.jpg`;
                 img.alt = `img${i + 1}`;
+                makeImageClickable(img); // Add click functionality
                 document.getElementById('gridContainer').appendChild(img);
               }
             </script>
