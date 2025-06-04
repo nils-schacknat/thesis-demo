@@ -10,6 +10,15 @@
   <link rel="stylesheet" href="./static/css/index.css">
   <link rel="icon" href="./static/images/Dante-alighieri.jpeg">
   <style>
+    code {
+      color: #555;                   /* Dark gray text instead of bright red */
+      background-color: #f5f5f5;     /* Very light gray background */
+      padding: 2px 4px;              /* Small padding for readability */
+      border-radius: 4px;            /* Rounded corners */
+      font-family: Menlo, Monaco,      /* Monospaced font */
+                   Consolas, "Courier New", monospace;
+      font-size: 0.95em;             /* Slightly smaller than surrounding text */
+    }
     /* ============================
        GENERAL GRID / VIDEO STYLES
        ============================ */
@@ -153,24 +162,6 @@
       margin-bottom: 1rem;
       flex-shrink: 0;
     }
-    .selector-container {
-      max-width: 1600px;
-      margin: 1rem auto;
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      gap: 1rem;
-    }
-    .selector-container label {
-      font-size: 1.25rem;
-      font-weight: 500;
-    }
-    .selector-container select {
-      padding: 0.5rem;
-      font-size: 1rem;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
   </style>
   <script defer src="./static/js/fontawesome.all.min.js"></script>
   <script>
@@ -238,7 +229,7 @@
     //  DATA & STATE
     // ===================
     const methods   = ["dante-8", "dante-1", "bensaid-8", "v-strong", "wvn-v2"];
-    const method_names = ["DANTE (8)", "DANTE (1)", "Bensaid et al. (8)", "V-STRONG", "WVN-v2"]
+    const method_names = ["DANTE (8)", "DANTE (1)", "Bensaid et al. (8)", "V-STRONG", "WVN-v2"];
     const sequences = ["park-2", "trail-12", "village"];
     let currentSequence = sequences[0];
     let currentMethod   = methods[0];
@@ -445,11 +436,10 @@
   <section class="section">
     <div class="container">
       <div class="content">
-        <p>This website aims to support the qualitative evaluation of my thesis, which addresses the task of vision-based traversability estimation.</p>
+        <p>This website aims to support the qualitative evaluation of my master's thesis, which addresses the task of vision-based traversability estimation.</p>
         <p>
           My thesis identifies <em>Depth Anything v2</em> as an ideal task-aligned foundational model and proposes to leverage its depth-aware and semantically rich patch embeddings for few-shot segmentation. Further, it demonstrates that, with the <em>Depth Anything v2</em> encoder as a backbone, a simple linear layer trained on only a few manual annotations can reliably predict traversability. A complementary instance selection strategy ensures that the training set remains both diverse and representative.
         </p>
-  
         <p>
           This method &mdash; termed <strong>DANTE</strong> (<em><strong>D</strong>epth <strong>AN</strong>ything based <strong>T</strong>raversability <strong>E</strong>stimation</em>) &mdash; requires minimal supervision and confidently outperforms recent pose-projection-based methods while running at real-time speeds.
         </p>
@@ -457,16 +447,28 @@
     </div>
   </section>
 
-  <!-- Sequence selector above the first section -->
-  <div class="selector-container">
-    <label for="sequenceSelector">Select Sequence:</label>
-    <select id="sequenceSelector"
-            style="padding: 0.5rem; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc;">
-      <!-- Populated dynamically -->
-    </select>
-  </div>
+  <section class="section">
+    <div class="container">
+      <div class="content">
+        <h1 class="title is-4">Evaluation on RUGD</h1>
+        <p>
+          This section presents full-sequence predictions on the RUGD dataset and compares four approaches:
+          Bensaid et al. (DINOv2 backbone with a linear probe), Wild Visual Navigation v2 (Frey et al.),
+          V-STRONG (Jung et al.) and DANTE (the proposed method).
+        </p>
+        <p>
+          All methods were trained on the sequences <code>park-1, trail, trail-3, trail-4, trail-5</code>.
+          The pose-projection-based approaches, V-STRONG and WVN-v2, receive poses obtained via visual odometry,
+          while the few-shot segmentation methods, DANTE and Bensaid et al., use ground-truth masks.
+          Predictions are shown for the <code>park-2, trail-12, village</code> sequences; the
+          <code>village</code> environment is absent from the training data, providing an out-of-domain test case.
+          For few-shot segmentation methods, the number of training images is indicated in parentheses.
+        </p>    
+      </div>
+    </div>
+  </section>
 
-  <!-- First section: Video + (potential) image grid -->
+  <!-- First section: Video + (potential) image grid, with Sequence and Method selectors on the same line -->
   <section class="section">
     <div class="container is-max-desktop">
       <div class="video-pair-with-grid-wrapper">
@@ -478,14 +480,26 @@
           </div>
         </div>
 
-        <!-- Right: Video + Method Selector -->
+        <!-- Right: Video + Sequence & Method Selectors -->
         <div class="video-box video-column">
-          <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
-            <div class="caption" style="margin-bottom: 0;">Method:</div>
-            <select id="methodSelector"
-                    style="padding: 0.5rem; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc;">
-              <!-- Populated dynamically -->
-            </select>
+          <!-- Combined wrapper to keep both selectors on one line -->
+          <div style="display: flex; align-items: center; justify-content: center; gap: 2rem; margin-bottom: 1rem;">
+            <!-- Sequence selector block -->
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <div class="caption" style="margin-bottom: 0;">Sequence:</div>
+              <select id="sequenceSelector"
+                      style="padding: 0.5rem; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc;">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <!-- Method selector block -->
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <div class="caption" style="margin-bottom: 0;">Method:</div>
+              <select id="methodSelector"
+                      style="padding: 0.5rem; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc;">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
           </div>
           <div class="video-wrapper">
             <video id="topVideo" controls muted playsinline>
@@ -493,6 +507,20 @@
             </video>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="content">
+        <h1 class="title is-4">Evaluation on the Fraunhofer IPA / Stuttgart University Campus</h1>
+        <p>
+          This section showcases predictions on two video sequences recorded on the Fraunhofer&nbsp;IPA / Stuttgart University campus. 
+          The scenes span indoor corridors, paved paths, grassy areas, and leaf-covered ground. 
+          One video serves as the source sequence &mdash; from which all training images are drawn &mdash; 
+          while the other functions as a validation sequence.
+        </p> 
       </div>
     </div>
   </section>
@@ -523,7 +551,9 @@
         <div class="video-column video-container">
           <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
             <div class="caption" style="margin-bottom: 0;">Results:</div>
-            <select id="videoSelector" onchange="changeVideo()" style="padding: 0.5rem; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc;">
+            <select id="videoSelector"
+                    onchange="changeVideo()"
+                    style="padding: 0.5rem; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc;">
               <option value="./static/videos/data_ipa_val.mp4">Validation Sequence</option>
               <option value="./static/videos/data_ipa_train.mp4">Source Sequence</option>
             </select>
