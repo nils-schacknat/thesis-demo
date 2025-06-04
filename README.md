@@ -1,16 +1,22 @@
-# Nerfies
+## Thesis Demo
 
-This is the repository that contains source code for the [Nerfies website](https://nerfies.github.io).
+This repository contains the source code for my [website](https://nils-schacknat.github.io/thesis-demo/) which provides video demonstrations for my thesis.
 
-If you find Nerfies useful for your work please cite:
-```
-@article{park2021nerfies
-  author    = {Park, Keunhong and Sinha, Utkarsh and Barron, Jonathan T. and Bouaziz, Sofien and Goldman, Dan B and Seitz, Steven M. and Martin-Brualla, Ricardo},
-  title     = {Nerfies: Deformable Neural Radiance Fields},
-  journal   = {ICCV},
-  year      = {2021},
-}
-```
-
-# Website License
-<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+## Website License
+This website is based on <strong>Nerfies</strong> and licensed under a 
+              <a
+                rel="license"
+                href="https://creativecommons.org/licenses/by-sa/4.0/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Creative Commons Attribution-ShareAlike 4.0 International License
+              </a>.
+              This means you are free to borrow the source code — please link back to 
+              <a
+                href="https://github.com/nerfies/nerfies.github.io"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                the original project
+              </a>.

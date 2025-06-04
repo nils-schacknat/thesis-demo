@@ -221,6 +221,7 @@
       const selectedValue = selector.value;
       video.src = selectedValue;
       video.load();
+      video.playbackRate = 0.75;
       video.play();
     }
   </script>
@@ -233,6 +234,7 @@
     const sequences = ["park-2", "trail-12", "village"];
     let currentSequence = sequences[0];
     let currentMethod   = methods[0];
+    let isFirstSequenceLoad = true;
 
     function buildVideoPath(method, sequence) {
       return `./static/videos/${method}/${method}_${sequence}.mp4`;
@@ -278,15 +280,23 @@
 
       const onLoaded = () => {
         video.currentTime = 0;
-        video.play();
-        // Hide controls after starting playback
-        setTimeout(() => {
-          video.controls = false;
-        }, 100);
+
+        // Only autoplay if we've already done the first load
+        if (!isFirstSequenceLoad) {
+          video.play();
+          // hide controls after playback starts (same as before)
+          setTimeout(() => {
+            video.controls = false;
+          }, 100);
+        }
+
+        // Once we've hit this point, clear the "first load" flag
+        isFirstSequenceLoad = false;
         video.removeEventListener('loadedmetadata', onLoaded);
       };
       video.addEventListener('loadedmetadata', onLoaded);
     }
+
 
     function onSequenceChange() {
       currentSequence = document.getElementById('sequenceSelector').value;
@@ -359,6 +369,9 @@
       // Initialize both top video + image column
       updateVideoSequence();
       updateImageColumn();
+
+      const mainVideo = document.getElementById('mainVideo');
+      mainVideo.playbackRate = 0.75;
 
       // Add hover/click functionality to show controls for the top video
       const topVideo = document.getElementById('topVideo');
@@ -433,7 +446,7 @@
     </div>
   </section>
   
-  <section class="section">
+  <section class="section" style="margin: -50px 0 -60px 0;">
     <div class="container">
       <div class="content">
         <p>This website aims to support the qualitative evaluation of my master's thesis, which addresses the task of vision-based traversability estimation.</p>
@@ -441,77 +454,14 @@
           My thesis identifies <em>Depth Anything v2</em> as an ideal task-aligned foundational model and proposes to leverage its depth-aware and semantically rich patch embeddings for few-shot segmentation. Further, it demonstrates that, with the <em>Depth Anything v2</em> encoder as a backbone, a simple linear layer trained on only a few manual annotations can reliably predict traversability. A complementary instance selection strategy ensures that the training set remains both diverse and representative.
         </p>
         <p>
-          This method &mdash; termed <strong>DANTE</strong> (<em><strong>D</strong>epth <strong>AN</strong>ything based <strong>T</strong>raversability <strong>E</strong>stimation</em>) &mdash; requires minimal supervision and confidently outperforms recent pose-projection-based methods while running at real-time speeds.
+          This method &mdash; termed <strong>DANTE</strong> (<em><strong>D</strong>epth <strong>AN</strong>ything based <strong>T</strong>raversability <strong>E</strong>stimation</em>) &mdash; requires minimal supervision and confidently surpasses recent pose-projection-based methods while running at real-time speeds.
+          The video below demonstrates the performance on two sequences recorded at the Fraunhofer IPA / Stuttgart University campus, when trained with only eight manually annotated images taken from the “Source Sequence”.
         </p>
       </div>
     </div>
   </section>
 
-  <section class="section">
-    <div class="container">
-      <div class="content">
-        <h1 class="title is-4">Evaluation on RUGD</h1>
-        <p>
-          This section presents full-sequence predictions on the RUGD dataset and compares four approaches:
-          Bensaid et al. (DINOv2 backbone with a linear probe), Wild Visual Navigation v2 (Frey et al.),
-          V-STRONG (Jung et al.) and DANTE (the proposed method).
-        </p>
-        <p>
-          All methods were trained on the sequences <code>park-1, trail, trail-3, trail-4, trail-5</code>.
-          The pose-projection-based approaches, V-STRONG and WVN-v2, receive poses obtained via visual odometry,
-          while the few-shot segmentation methods, DANTE and Bensaid et al., use ground-truth masks.
-          Predictions are shown for the <code>park-2, trail-12, village</code> sequences; the
-          <code>village</code> environment is absent from the training data, providing an out-of-domain test case.
-          For few-shot segmentation methods, the number of training images is indicated in parentheses.
-        </p>    
-      </div>
-    </div>
-  </section>
-
-  <!-- First section: Video + (potential) image grid, with Sequence and Method selectors on the same line -->
-  <section class="section">
-    <div class="container is-max-desktop">
-      <div class="video-pair-with-grid-wrapper">
-        <!-- Left: Image column (always occupies its flex share, but hidden if no images) -->
-        <div class="compact-image-column">
-          <div class="caption">Training Images</div>
-          <div id="gridContainer2" class="grid-container">
-            <!-- JS will inject up to 8 images, or 1 image, or leave blank -->
-          </div>
-        </div>
-
-        <!-- Right: Video + Sequence & Method Selectors -->
-        <div class="video-box video-column">
-          <!-- Combined wrapper to keep both selectors on one line -->
-          <div style="display: flex; align-items: center; justify-content: center; gap: 2rem; margin-bottom: 1rem;">
-            <!-- Sequence selector block -->
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <div class="caption" style="margin-bottom: 0;">Sequence:</div>
-              <select id="sequenceSelector"
-                      style="padding: 0.5rem; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc;">
-                <!-- Populated dynamically -->
-              </select>
-            </div>
-            <!-- Method selector block -->
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <div class="caption" style="margin-bottom: 0;">Method:</div>
-              <select id="methodSelector"
-                      style="padding: 0.5rem; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc;">
-                <!-- Populated dynamically -->
-              </select>
-            </div>
-          </div>
-          <div class="video-wrapper">
-            <video id="topVideo" controls muted playsinline>
-              <!-- Source set dynamically by JS -->
-            </video>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
+  <!-- <section class="section" style="margin: -50px 0;">
     <div class="container">
       <div class="content">
         <h1 class="title is-4">Evaluation on the Fraunhofer IPA / Stuttgart University Campus</h1>
@@ -523,7 +473,7 @@
         </p> 
       </div>
     </div>
-  </section>
+  </section> -->
 
   <!-- Second section: Always‐on overlayed grid + validation/source video -->
   <section class="section">
@@ -559,8 +509,75 @@
             </select>
           </div>
           <div class="video-wrapper">
-            <video id="mainVideo" controls muted loop playsinline>
+            <video id="mainVideo" controls autoplay muted loop playsinline>
               <source src="./static/videos/data_ipa_val.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="content">
+        <h1 class="title is-4">Evaluation on RUGD</h1>
+        <p>
+          This section presents full-sequence predictions on the
+          RUGD dataset and compares four approaches:
+          <a href="https://arxiv.org/abs/2401.11311" target="_blank" rel="noopener noreferrer">Bensaid et al.</a> (DINOv2 backbone with a linear probe), 
+          <a href="https://arxiv.org/abs/2404.07110" target="_blank" rel="noopener noreferrer">Wild Visual Navigation v2</a> (Frey et al.), 
+          <a href="https://arxiv.org/abs/2312.16016" target="_blank" rel="noopener noreferrer">V-STRONG</a> (Jung et al.) 
+          and DANTE (the proposed method).
+        </p>
+        <p>
+          All methods were trained on the sequences <code>park-1, trail, trail-3, trail-4, trail-5</code>.
+          The pose-projection-based approaches, V-STRONG and WVN-v2, receive poses obtained via visual odometry,
+          while the few-shot segmentation methods, DANTE and Bensaid et al., use ground-truth masks.
+          Predictions are shown for the <code>park-2, trail-12, village</code> sequences. Note that the
+          <code>village</code> environment is absent from the training data, providing an out-of-domain test case.
+          For few-shot segmentation methods, the number of training images is indicated in parentheses.
+        </p>    
+      </div>
+    </div>
+  </section>
+
+  <!-- First section: Video + (potential) image grid, with Sequence and Method selectors on the same line -->
+  <section class="section" style="margin: -50px 0 0 0;">
+    <div class="container is-max-desktop">
+      <div class="video-pair-with-grid-wrapper">
+        <!-- Left: Image column (always occupies its flex share, but hidden if no images) -->
+        <div class="compact-image-column">
+          <div class="caption">Training Images</div>
+          <div id="gridContainer2" class="grid-container">
+            <!-- JS will inject up to 8 images, or 1 image, or leave blank -->
+          </div>
+        </div>
+
+        <!-- Right: Video + Sequence & Method Selectors -->
+        <div class="video-box video-column">
+          <!-- Combined wrapper to keep both selectors on one line -->
+          <div style="display: flex; align-items: center; justify-content: center; gap: 2rem; margin-bottom: 1rem;">
+            <!-- Sequence selector block -->
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <div class="caption" style="margin-bottom: 0;">Sequence:</div>
+              <select id="sequenceSelector"
+                      style="padding: 0.5rem; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc;">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <!-- Method selector block -->
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <div class="caption" style="margin-bottom: 0;">Method:</div>
+              <select id="methodSelector"
+                      style="padding: 0.5rem; font-size: 1rem; border-radius: 4px; border: 1px solid #ccc;">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+          </div>
+          <div class="video-wrapper">
+            <video id="topVideo" controls muted playsinline>
+              <!-- Source set dynamically by JS -->
             </video>
           </div>
         </div>
