@@ -10,6 +10,12 @@
   <link rel="stylesheet" href="./static/css/index.css">
   <link rel="icon" href="./static/images/Dante-alighieri.jpeg">
   <style>
+    #top-left-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 1000; /* ensure it's on top */
+    }
     code {
       color: #555;                   /* Dark gray text instead of bright red */
       background-color: #f5f5f5;     /* Very light gray background */
@@ -424,6 +430,15 @@
   </script>
 </head>
 <body>
+  <div id="top-left-button">
+    <a href="https://github.com/nils-schacknat/dante" target="_blank" rel="noopener noreferrer"
+       class="external-link button is-normal is-rounded">
+      <span class="icon">
+        <i class="fab fa-github"></i>
+      </span>
+      <span>Code</span>
+    </a>
+  </div>
   <!-- Modal for enlarged images -->
   <div id="imageModal" class="modal">
     <button class="modal-close is-large" aria-label="close" onclick="closeModal()"></button>
@@ -449,7 +464,7 @@
   <section class="section" style="margin: -50px 0 -60px 0;">
     <div class="container">
       <div class="content">
-        <p>This website aims to support the qualitative evaluation of my master's thesis, which addresses the task of vision-based traversability estimation.</p>
+        <p>The purpose of this website is to support the qualitative evaluation of my master's thesis, which addresses the task of vision-based traversability estimation.</p>
         <p>
           My thesis identifies <em>Depth Anything v2</em> as an ideal task-aligned foundational model and proposes to leverage its depth-aware and semantically rich patch embeddings for few-shot segmentation. Further, it demonstrates that, with the <em>Depth Anything v2</em> encoder as a backbone, a simple linear layer trained on only a few manual annotations can reliably predict traversability. A complementary instance selection strategy ensures that the training set remains both diverse and representative.
         </p>
